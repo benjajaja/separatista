@@ -23,17 +23,17 @@ def link(update: Update, context: CallbackContext) -> None:
             update.message.reply_text(f'Already awaiting linkage by you in another group.')
             return
         elif get_fork_chat(update.effective_chat.id) is not None:
-            update.message.reply_text(f'Already linked to.')
+            update.message.reply_text(f'Already linked from.')
             return
         elif get_base_chat(update.effective_chat.id) is not None:
-            update.message.reply_text(f'Already linked from.')
+            update.message.reply_text(f'Already linked to.')
             return
 
         r.hset("links_from", group_id, update.effective_chat.id)
         r.hdel("links_users", str(update.effective_user.id))
         update.message.reply_text(f'Linked this chat ({update.effective_chat.id}) as separatist of {group_id}!')
         link = context.bot.create_chat_invite_link(chat_id=update.effective_chat.id).invite_link
-        context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
+        context.bot.send_message(chat_id=group_id,
                 text=f"Link to separatist chat successful! {link}")
 updater.dispatcher.add_handler(CommandHandler('link', link))
 
@@ -49,16 +49,17 @@ def get_base_chat(id):
 def forward(update, context):
     if get_fork_chat(update.effective_chat.id) is not None and update.message.message_id is not None:
         print(f"forward {update.message.message_id}")
-        message = context.bot.forward_message(chat_id=get_fork_chat(update.effective_chat.id),
+        fork = get_fork_chat(update.effective_chat.id)
+        message = context.bot.forward_message(chat_id=fork,
                 from_chat_id=update.effective_chat.id,
                 message_id=update.message.message_id)
-        r.hset("forwards", message.message_id, str(update.message.message_id) + ":" + str(update.effective_chat.id))
+        r.hset("forwards:" + fork, message.message_id, str(update.message.message_id) + ":" + str(update.effective_chat.id))
 
     elif (update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
         and update.message.reply_to_message.forward_date is not None):
         print(f"find forward {update.message.reply_to_message.message_id}")
-        forward = r.hget("forwards", update.message.reply_to_message.message_id)
+        forward = r.hget("forwards:" + str(update.effective_chat.id), update.message.reply_to_message.message_id)
         if forward is not None:
             split = forward.split(":")
             if len(split) == 2:
@@ -71,7 +72,7 @@ def forward(update, context):
                     return
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
-                text=f"[unmatched] {update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
+                text=f"[unmatched forward] {update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
     else:
         print(f"Unlinked message / not a target: {update.effective_chat.id} ({update.message.reply_to_message})")
 

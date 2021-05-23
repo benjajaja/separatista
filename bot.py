@@ -6,7 +6,7 @@ import json
 
 updater = Updater(os.getenv("SEPARATIST_TOKEN"))
 
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='localhost', port=os.getenv("SEPARATIST_REDIS_PORT", 6366), db=0, decode_responses=True)
 print(f"redis: {json.dumps(r.hgetall('links_users'))}")
 
 def hello(update: Update, context: CallbackContext) -> None:

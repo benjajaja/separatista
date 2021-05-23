@@ -48,7 +48,6 @@ def get_base_chat(id):
 
 def forward(update, context):
     if get_fork_chat(update.effective_chat.id) is not None and update.message.message_id is not None:
-        print(f"forward {update.message.message_id}")
         fork = get_fork_chat(update.effective_chat.id)
         message = context.bot.forward_message(chat_id=fork,
                 from_chat_id=update.effective_chat.id,
@@ -58,7 +57,6 @@ def forward(update, context):
     elif (update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
         and update.message.reply_to_message.forward_date is not None):
-        print(f"find forward {update.message.reply_to_message.message_id}")
         forward = r.hget("forwards:" + str(update.effective_chat.id), update.message.reply_to_message.message_id)
         if forward is not None:
             split = forward.split(":")
@@ -67,17 +65,17 @@ def forward(update, context):
                 base_chat_id = int(split[1])
                 if forward_message_id:
                     context.bot.send_message(chat_id=base_chat_id,
-                            text=f"{update.effective_message.text}\n --{update.effective_user.first_name} in the separatist group",
+                            text=f"{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭",
                             reply_to_message_id=forward_message_id)
                     return
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
-                text=f"[unmatched forward] {update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
+                text=f"[unmatched forward] {'@' + update.effective_user.username if update.effective_user.username else update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
     else:
         print(f"Unlinked message / not a target: {update.effective_chat.id} ({update.message.reply_to_message})")
 
 
-updater.dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), forward))
+updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))
 
 updater.start_polling()
 print("bot started.")

@@ -32,9 +32,9 @@ def link(update: Update, context: CallbackContext) -> None:
         r.hset("links_from", group_id, update.effective_chat.id)
         r.hdel("links_users", str(update.effective_user.id))
         update.message.reply_text(f'Linked this chat ({update.effective_chat.id}) as separatist of {group_id}!')
-        link = context.bot.create_chat_invite_link(chat_id=update.effective_chat.id).invite_link
         context.bot.send_message(chat_id=group_id,
-                text=f"Link to separatist chat successful! {link}")
+                text=f"Link to separatist chat successful!")
+
 updater.dispatcher.add_handler(CommandHandler('link', link))
 
 def get_fork_chat(id):
@@ -72,7 +72,7 @@ def forward(update, context):
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
                 text=f"[unmatched forward] {'@' + update.effective_user.username if update.effective_user.username else update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
     else:
-        print(f"Unlinked message / not a target: {update.effective_chat.id} ({update.message.reply_to_message})")
+        print(f"Unlinked message / not a target: {update.effective_chat.id}")
 
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))

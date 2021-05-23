@@ -87,8 +87,6 @@ def forward(update, context):
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
                 text=f"[unmatched forward] {'@' + update.effective_user.username if update.effective_user.username else update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
-    else:
-        print(f"Unlinked message / not a target: {update.effective_chat.id}")
 
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))

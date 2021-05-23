@@ -93,7 +93,13 @@ def forward(update, context):
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))
 
-updater.start_polling()
+if os.getenv("PORT") is None:
+    updater.start_polling()
+else:
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(os.environ.get('PORT', '8443')),
+                          url_path=os.getenv("SEPARATIST_TOKEN"),
+                          webhook_url="https://separatista.herokuapp.com/" + os.getenv("SEPARATIST_TOKEN"))
 print("bot started.")
 updater.idle()
 

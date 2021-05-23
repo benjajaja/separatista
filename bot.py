@@ -6,8 +6,9 @@ import json
 
 updater = Updater(os.getenv("SEPARATIST_TOKEN"))
 
-r = redis.Redis(host='localhost', port=os.getenv("SEPARATIST_REDIS_PORT", 6366), db=0, decode_responses=True)
-print(f"redis: {json.dumps(r.hgetall('links_users'))}")
+r = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6366"), decode_responses=True)
+print(f"links_users: {json.dumps(r.hgetall('links_users'))}")
+print(f"links_from: {json.dumps(r.hgetall('links_from'))}")
 
 def hello(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(f'Hello {update.effective_user.first_name}')
@@ -36,6 +37,21 @@ def link(update: Update, context: CallbackContext) -> None:
                 text=f"Link to separatist chat successful!")
 
 updater.dispatcher.add_handler(CommandHandler('link', link))
+
+def unlink(update: Update, context: CallbackContext) -> None:
+    group_id = r.hget("links_users", update.effective_user.id)
+    if group_id is not None:
+        r.hdel("links_users", str(update.effective_user.id))
+        update.message.reply_text(f'Your link petition has been removed.')
+    else:
+        if r.hexists("links_from", update.effective_chat.id):
+            r.hdel("links_from", update.effective_chat.id)
+            update.message.reply_text(f'This group has been unlinked.')
+        else:
+            update.message.reply_text(f'This group is not being forwarded - do you meant to unlink the source chat group?')
+
+updater.dispatcher.add_handler(CommandHandler('unlink', unlink))
+
 
 def get_fork_chat(id):
     return r.hget("links_from", id)

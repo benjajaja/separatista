@@ -90,7 +90,7 @@ def forward(update, context):
                     return
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
-                text=f"[unmatched forward] {'@' + update.effective_user.username if update.effective_user.username else update.effective_user.first_name} (in the separatist group):\n{update.effective_message.text}")
+                text=f"[Unmatched forward]\n{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭",
 
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))

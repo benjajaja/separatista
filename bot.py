@@ -62,18 +62,22 @@ def get_base_chat(id):
     return inv_map.get(id)
 
 
+FORWARDS_EXPIRY = 604800
 def forward(update, context):
     if get_fork_chat(update.effective_chat.id) is not None and update.message.message_id is not None:
         fork = get_fork_chat(update.effective_chat.id)
         message = context.bot.forward_message(chat_id=fork,
                 from_chat_id=update.effective_chat.id,
                 message_id=update.message.message_id)
-        r.hset("forwards:" + fork, message.message_id, str(update.message.message_id) + ":" + str(update.effective_chat.id))
+        r.setex("forwards:" + fork + ":" + str(message.message_id),
+                str(update.message.message_id) + ":" + str(update.effective_chat.id)
+                FORWARDS_EXPIRY)
 
     elif (update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
         and update.message.reply_to_message.forward_date is not None):
-        forward = r.hget("forwards:" + str(update.effective_chat.id), update.message.reply_to_message.message_id)
+        forward = r.getex("forwards:" + str(update.effective_chat.id) + ":" + str(update.message.reply_to_message.message_id),
+                FORWARDS_EXPIRY)
         if forward is not None:
             split = forward.split(":")
             if len(split) == 2:

@@ -77,8 +77,7 @@ def forward(update, context):
         and update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
         and update.message.reply_to_message.forward_date is not None):
-        forward = r.getex("forwards:" + str(update.effective_chat.id) + ":" + str(update.message.reply_to_message.message_id),
-                FORWARDS_EXPIRY)
+        forward = r.get("forwards:" + str(update.effective_chat.id) + ":" + str(update.message.reply_to_message.message_id))
         if forward is not None:
             split = forward.split(":")
             if len(split) == 2:

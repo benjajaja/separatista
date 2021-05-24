@@ -73,7 +73,8 @@ def forward(update, context):
                 FORWARDS_EXPIRY,
                 str(update.message.message_id) + ":" + str(update.effective_chat.id))
 
-    elif (update.message.reply_to_message is not None
+    elif (update.message is not None
+        and update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
         and update.message.reply_to_message.forward_date is not None):
         forward = r.getex("forwards:" + str(update.effective_chat.id) + ":" + str(update.message.reply_to_message.message_id),

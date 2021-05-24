@@ -70,8 +70,8 @@ def forward(update, context):
                 from_chat_id=update.effective_chat.id,
                 message_id=update.message.message_id)
         r.setex("forwards:" + fork + ":" + str(message.message_id),
-                str(update.message.message_id) + ":" + str(update.effective_chat.id)
-                FORWARDS_EXPIRY)
+                FORWARDS_EXPIRY,
+                str(update.message.message_id) + ":" + str(update.effective_chat.id))
 
     elif (update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
@@ -90,7 +90,7 @@ def forward(update, context):
                     return
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
-                text=f"[Unmatched forward]\n{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭",
+                text=f"[Unmatched forward]\n{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭")
 
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))

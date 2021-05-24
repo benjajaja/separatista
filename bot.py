@@ -1,5 +1,5 @@
 import os
-from telegram import Update
+from telegram import Update, MessageEntity
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
 import redis
 import json
@@ -64,7 +64,7 @@ def get_base_chat(id):
 
 FORWARDS_EXPIRY = 604800
 def forward(update, context):
-    if get_fork_chat(update.effective_chat.id) is not None and update.message.message_id is not None:
+    if get_fork_chat(update.effective_chat.id) is not None and update.message is not None and update.message.message_id is not None:
         fork = get_fork_chat(update.effective_chat.id)
         message = context.bot.forward_message(chat_id=fork,
                 from_chat_id=update.effective_chat.id,
@@ -94,7 +94,21 @@ def forward(update, context):
                 text=f"[Unmatched forward]\n{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭")
 
 
+
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))
+
+
+def force_forward(update: Update, context: CallbackContext) -> None:
+    #  update.message.reply_text(f'Hello {update.effective_user.first_name}')
+    base_chat_id = get_base_chat(update.effective_chat.id)
+    if base_chat_id is None:
+        update.message.reply_text(f'This is not a separatist chat.')
+        return
+    context.bot.forward_message(chat_id=base_chat_id,
+            from_chat_id=update.effective_chat.id,
+            message_id=update.message.message_id)
+
+updater.dispatcher.add_handler(CommandHandler('f', force_forward))
 
 if os.getenv("PORT") is None:
     updater.start_polling()

@@ -87,21 +87,22 @@ def forward(update, context):
                 base_chat_id = int(split[1])
                 if forward_message_id:
                     context.bot.send_message(chat_id=base_chat_id,
-                            text=f"{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭ https://t.me/joinchat/1hWbLIeq-CcyMWFk",
+                            text=format_fwd(update.effective_message.text, update.effective_user),
                             reply_to_message_id=forward_message_id)
                     return
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
-                text=f"[Unmatched forward]\n{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭")
+                text=format_fwd(update.effective_message.text, update.effective_user))
     else:
         base_chat_id = get_base_chat(update.effective_chat.id)
         if (base_chat_id is not None
             and update.message.text is not None
             and update.message.text.startswith("!")):
             context.bot.send_message(chat_id=base_chat_id,
-                    text=f"\n{update.effective_message.text[1:]}\n    --{update.effective_user.first_name}, in the separatist group ☭")
+                    text=format_fwd(update.effective_message.text[1:], update.effective_user))
 
-
+def format_fwd(text, user):
+    return f"{update.effective_message.text}\n    --{update.effective_user.username if update.effective_user.username is not None else update.effective_user.first_name}, in the separatist group ☭ https://t.me/joinchat/1hWbLIeq-CcyMWFk"
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))
 

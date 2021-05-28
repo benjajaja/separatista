@@ -100,7 +100,10 @@ def forward(update, context):
                     text=format_fwd(update.effective_message.text, update.effective_user))
 
 def format_fwd(text, user):
-    return f"{text}\n    --{user.first_name}, in the separatist group ☭ https://t.me/joinchat/1hWbLIeq-CcyMWFk"
+    if text is not None:
+        return f"{text}\n    --{user.first_name}, in the separatist group ☭"
+    else:
+        return f"To see this media, join https://t.me/joinchat/1hWbLIeq-CcyMWFk\n    --{user.first_name}, in the separatist group ☭"
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))
 

@@ -95,14 +95,12 @@ def forward(update, context):
                 text=format_fwd(update.effective_message.text, update.effective_user))
     else:
         base_chat_id = get_base_chat(update.effective_chat.id)
-        if (base_chat_id is not None
-            and update.message.text is not None
-            and update.message.text.startswith("!")):
+        if base_chat_id is not None:
             context.bot.send_message(chat_id=base_chat_id,
-                    text=format_fwd(update.effective_message.text[1:], update.effective_user))
+                    text=format_fwd(update.effective_message.text, update.effective_user))
 
 def format_fwd(text, user):
-    return f"{update.effective_message.text}\n    --{update.effective_user.username if update.effective_user.username is not None else update.effective_user.first_name}, in the separatist group ☭ https://t.me/joinchat/1hWbLIeq-CcyMWFk"
+    return f"{text}\n    --{user.first_name}, in the separatist group ☭ https://t.me/joinchat/1hWbLIeq-CcyMWFk"
 
 updater.dispatcher.add_handler(MessageHandler((~Filters.command), forward))
 

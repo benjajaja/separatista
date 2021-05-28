@@ -85,7 +85,7 @@ def forward(update, context):
                 base_chat_id = int(split[1])
                 if forward_message_id:
                     context.bot.send_message(chat_id=base_chat_id,
-                            text=f"{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭",
+                            text=f"{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭ https://t.me/joinchat/1hWbLIeq-CcyMWFk",
                             reply_to_message_id=forward_message_id)
                     return
 

@@ -59,12 +59,15 @@ def get_fork_chat(id):
 def get_base_chat(id):
     values = r.hgetall("links_from")
     inv_map = {v: k for k, v in values.items()}
-    return inv_map.get(id)
+    return inv_map.get(str(id))
 
 
 FORWARDS_EXPIRY = 604800
 def forward(update, context):
-    if get_fork_chat(update.effective_chat.id) is not None and update.message is not None and update.message.message_id is not None:
+    if update.message is None:
+        return
+
+    if get_fork_chat(update.effective_chat.id) is not None and update.message.message_id is not None:
         fork = get_fork_chat(update.effective_chat.id)
         message = context.bot.forward_message(chat_id=fork,
                 from_chat_id=update.effective_chat.id,
@@ -73,8 +76,7 @@ def forward(update, context):
                 FORWARDS_EXPIRY,
                 str(update.message.message_id) + ":" + str(update.effective_chat.id))
 
-    elif (update.message is not None
-        and update.message.reply_to_message is not None
+    elif (update.message.reply_to_message is not None
         and update.message.reply_to_message.from_user.id == context.bot.id
         and update.message.reply_to_message.forward_date is not None):
         forward = r.get("forwards:" + str(update.effective_chat.id) + ":" + str(update.message.reply_to_message.message_id))
@@ -91,6 +93,13 @@ def forward(update, context):
 
         context.bot.send_message(chat_id=get_base_chat(update.effective_chat.id),
                 text=f"[Unmatched forward]\n{update.effective_message.text}\n    --{update.effective_user.first_name}, in the separatist group ☭")
+    else:
+        base_chat_id = get_base_chat(update.effective_chat.id)
+        if (base_chat_id is not None
+            and update.message.text is not None
+            and update.message.text.startswith("!")):
+            context.bot.send_message(chat_id=base_chat_id,
+                    text=f"\n{update.effective_message.text[1:]}\n    --{update.effective_user.first_name}, in the separatist group ☭")
 
 
 
